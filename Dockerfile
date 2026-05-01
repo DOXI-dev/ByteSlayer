@@ -1,13 +1,21 @@
-FROM rust:1.87-slim as builder
+FROM rust:latest as builder
 WORKDIR /app
 COPY . .
-WORKDIR /app/ByteSlayer
 RUN cargo build --release
 
 FROM python:3.9-slim
 WORKDIR /app
-COPY --from=builder /app/ByteSlayer/target/release/byteslayer ./engines/ByteSlayer-ChessBot
+
+RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p ./engines
+
+COPY --from=builder /app/target/release/byteslayer ./engines/ByteSlayer-ChessBot
+
 COPY . .
-RUN pip install -r requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt
+
 RUN chmod +x ./engines/ByteSlayer-ChessBot
+
 CMD ["python", "lichess-bot.py"]
