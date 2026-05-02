@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /v
 
 RUN mkdir -p ./engines
 
-COPY --from=builder /app/target/release/byteslayer ./engines/ByteSlayer-ChessBot
+COPY --from=builder /app/target/release/ByteSlayer-ChessBot ./engines/ByteSlayer-ChessBot
 
 COPY . .
 
