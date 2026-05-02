@@ -19,4 +19,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN chmod +x ./engines/ByteSlayer-ChessBot
 
 ENV PYTHONPATH="/app"
-CMD ["python", "lichess-bot.py"]
+CMD ls -R /app && python lichess-bot.py
