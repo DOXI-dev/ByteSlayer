@@ -1,9 +1,9 @@
-FROM python:3.12-slim
+FROM rust:1.87-slim as builder
 WORKDIR /app
 COPY . .
 RUN cargo build --release
 
-FROM python:3.9-slim
+FROM python:3.12-slim
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
