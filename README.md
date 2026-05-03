@@ -1,2 +1,2 @@
 # ByteSlayer
-ByteSlayer is a ChessEngine, work in progress for the ChessInterface &amp; DiscordBot.
+ByteSlayer is a ChessEngine written in Rust, work in progress for the ChessInterface &amp; DiscordBot.
