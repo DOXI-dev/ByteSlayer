@@ -1,19 +1,68 @@
-![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-yellow)
-![Version](https://img.shields.io/badge/Version-0.1.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+!![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-yellow)
+[[Version](https://img.shields.io/badge/Version-0.1.0-blue)
+[![License](https://img.shields.io/badge/License-MIT-green)
 
 [![Rust](https://img.shields.io/badge/Language-Rust-orange?logo=rust)](https://www.rust-lang.org/)
 [![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![Render](https://img.shields.io/badge/Hosted%20on-Render-46E3B7?logo=render&logoColor=white)](https://render.com/)
-[![Flask](https://img.shields.io/badge/Framework-Flask-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[[![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[[Render](https://img.shields.io/badge/Hosted%20on-Render-46E3B7?logo=render&logoColor=white)](https://render.com/)
+[[![Flask](https://img.shields.io/badge/Framework-Flask-000000?logo=flask&logoColor=white)](https://flask.pallettprojects.org/)
 
-[![Lichess](https://img.shields.io/badge/Play%20on-Lichess-white?logo=lichess&logoColor=black)](https://lichess.org/@/ByteSlayer-ChessBot)
+[[![Lichess](https://img.shields.io/badge/Play%20on-Lichess-white?logo=lichess&logoColor=black)](https://lichess.org/@/ByteSlayer-ChessBot)
 
 # ByteSlayer
 ByteSlayer is a ChessEngine written in Rust, work in progress for the ChessInterface &amp; DiscordBot.
 
 While not aiming to beat Stockfish (yet!), ByteSlayer is a modern alternative for those looking for a fast, Rust-based engine with a focus on clean code and easy Lichess integration.
+
+## Prerequisites
+
+- [Rust](https://www.rust-lang.org/tools/install) (latest stable)
+- [Python 3.10+](https://www.python.org/downloads/)
+- A [Lichess account](https://lichess.org/) with an [API token](https://lichess.org/account/oauth/token)
+
+## Installation
+
+1. **Clone the repository:**
+    ```
+    git clone https://github.com/DOXI-dev/ByteSlayer.git
+    cd ByteSlayer
+    ```
+
+2. **Install Python dependencies:**
+    ```
+    pip install -r requirements.txt
+    ```
+
+3. **Build the Rust engine:**
+    ```
+    cargo build --release
+    ```
+    Copy the binary to the engines directory:
+    ```
+    mkdir -p engines
+    cp target/release/ByteSlayer-ChessBot engines/
+    ```
+
+4. **Configure your Lichess token:**
+    Set the environment variable:
+    ```
+    export LICHESS_BOT_TOKEN=your_token_here
+    ```
+
+## Running
+
+```
+python lichess-bot.py
+``
+
+## Configuration
+
+Edit `config.yml` to customize bot behavior, challenge preferences, time controls, and more. See the inline comments for documentation.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file.
 
 ## Contribute
 Contributions are welcome! Whether it's to optimize the Rust search algorithm, add features, or anything else, feel free to open a Pull Request.
