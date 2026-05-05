@@ -1,6 +1,6 @@
 ![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-yellow)
 ![Version](https://img.shields.io/badge/Version-0.1.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-GPLv3-green)
 
 [![Rust](https://img.shields.io/badge/Language-Rust-orange?logo=rust)](https://www.rust-lang.org/)
 [![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)](https://www.python.org/)
