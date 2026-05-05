@@ -13,5 +13,7 @@
 # ByteSlayer
 ByteSlayer is a ChessEngine written in Rust, work in progress for the ChessInterface &amp; DiscordBot.
 
+While not aiming to beat Stockfish (yet!), ByteSlayer is a modern alternative for those looking for a fast, Rust-based engine with a focus on clean code and easy Lichess integration.
+
 ## Contribute
 Contributions are welcome! Whether it's to optimize the Rust search algorithm, add features, or anything else, feel free to open a Pull Request.
