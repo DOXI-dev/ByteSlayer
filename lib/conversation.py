@@ -1,5 +1,6 @@
 """Allows lichess-bot to send messages to the chat."""
 import logging
+import time
 from lib import model
 from lib.engine_wrapper import EngineWrapper
 from lib.lichess import Lichess
@@ -57,21 +58,22 @@ class Conversation:
         self.messages.append(line)
         logger.info(f"*** {self.game.url()} [{line.room}] {line.username}: {line.text}")
         if line.text[0] == self.command_prefix:
-            self.command(line, line.text[1:].lower())
+            self.command(line, line.text[1:].lower(), time.time())
 
-    def command(self, line: ChatLine, cmd: str) -> None:
+    def command(self, line: ChatLine, cmd: str, received_time: float = 0.0) -> None:
         """
         Reacts to the specific commands in the chat.
 
         :param line: Information about the message.
         :param cmd: The command to react to.
+        :param received_time: Timestamp when the message was received.
         """
         from_self = line.username == self.game.username
         is_eval = cmd.startswith("eval")
         if cmd in ("commands", "help"):
             self.send_reply(line,
                             "Supported commands: !wait (wait a minute for my first move), !name, "
-                            "!eval (or any text starting with !eval), !queue")
+                            "!eval (or any text starting with !eval), !queue, !ping")
         elif cmd == "wait" and self.game.is_abortable():
             self.game.ping(seconds(60), seconds(120), seconds(120))
             self.send_reply(line, "Waiting 60 seconds...")
@@ -89,6 +91,9 @@ class Conversation:
                 self.send_reply(line, f"Challenge queue: {challengers}")
             else:
                 self.send_reply(line, "No challenges queued.")
+        elif cmd == "ping":
+            latency_ms = int((time.time() - received_time) * 1000)
+            self.send_reply(line, f"pong! ({latency_ms}ms)")
 
     def send_reply(self, line: ChatLine, reply: str) -> None:
         """
