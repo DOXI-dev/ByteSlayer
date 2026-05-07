@@ -3,32 +3,37 @@ This is the evaluation file for the chess engine. This code evaluates a position
 */
 
 // ----- LIBRARIES -----
-use chess::{Board, Color, Piece, ALL_SQUARES};
+use chess::{Board, Color, Piece};
 
 // ----- MODEL -----
 // Evaluation function
 pub fn evaluation(board: &Board) -> i32 {
     let mut score = 0;
 
-    for &square in &ALL_SQUARES {
-        if let Some(piece) = board.piece_on(square) {
-            let color = board.color_on(square).unwrap();
+    let pieces = [
+        Piece::Pawn,
+        Piece::Knight,
+        Piece::Bishop,
+        Piece::Rook,
+        Piece::Queen,
+        Piece::King,
+    ];
 
-            let value = match piece {
-                Piece::Pawn => 100,
-                Piece::Knight => 320,
-                Piece::Bishop => 330,
-                Piece::Rook => 500,
-                Piece::Queen => 900,
-                Piece::King => 20000,
-            };
+    for piece in pieces {
+        let value = match piece {
+            Piece::Pawn => 100,
+            Piece::Knight => 320,
+            Piece::Bishop => 330,
+            Piece::Rook => 500,
+            Piece::Queen => 900,
+            Piece::King => 20000,
+        };
 
-            if color == Color::White {
-                score += value;
-            } else {
-                score -= value;
-            }
-        }
+        let white_bb = board.pieces(piece) & board.color_combined(Color::White);
+        score += (white_bb.popcnt() as i32) * value;
+
+        let black_bb = board.pieces(piece) & board.color_combined(Color::Black);
+        score -= (black_bb.popcnt() as i32) * value;
     }
 
     let perspective = if board.side_to_move() == Color::White {
