@@ -59,6 +59,13 @@ fn go(board: &mut Board, command: Vec<&str>) {
     let time_limit_ms = my_time.map(|t| t / 40).unwrap_or(2000);
     let time_limit = Duration::from_millis(time_limit_ms as u64);
 
+    // Debugging
+    println!(
+        "time received: {:?} ms | time limit calculated: {} ms",
+        my_time,
+        time_limit_ms
+    );
+
     let start = Instant::now();
 
     let mut best_mv = None;
@@ -72,6 +79,14 @@ fn go(board: &mut Board, command: Vec<&str>) {
 
         if let Some(new_mv) = choose_move(depth, board) {
             best_mv = Some(new_mv);
+
+            // Debugging
+            println!(
+                "info depth {} time {} pv {}",
+                depth,
+                elapsed.as_millis(),
+                new_mv
+            );
         }
 
         if start.elapsed() >= time_limit {
