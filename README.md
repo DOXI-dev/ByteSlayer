@@ -1,5 +1,5 @@
 ![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-yellow)
-![Version](https://img.shields.io/badge/Version-0.2.0-alpha-blue)
+![Version](https://img.shields.io/badge/Version-0.2.0--alpha-blue)
 ![License](https://img.shields.io/badge/License-GPLv3-green)
 
 [![Rust](https://img.shields.io/badge/Language-Rust-orange?logo=rust)](https://www.rust-lang.org/)
