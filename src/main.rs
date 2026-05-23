@@ -9,6 +9,8 @@ License : GPLv3
 mod uci;
 mod evaluation;
 mod engine;
+mod pst;
+
 
 // ----- MAIN -----
 fn main() {
