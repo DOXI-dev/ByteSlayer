@@ -56,7 +56,24 @@ fn go(board: &mut Board, command: Vec<&str>) {
         btime
     };
 
-    let time_limit_ms = my_time.map(|t| t / 40).unwrap_or(2000);
+    // On compte le nombre total de pièces sur le plateau pour estimer la phase de jeu
+    let piece_count = board.combined().popcnt();
+
+    let time_limit_ms = match my_time {
+        Some(t) => {
+            if t < 20_000 {
+                800
+            } else if piece_count > 28 {
+                t / 60
+            } else if piece_count > 12 {
+                t / 35
+            } else {
+                t / 50
+            }
+        }
+        None => 2000,
+    };
+
     let time_limit = Duration::from_millis(time_limit_ms as u64);
 
     // Debugging
@@ -73,11 +90,17 @@ fn go(board: &mut Board, command: Vec<&str>) {
     for depth in 1..100 {
         let elapsed = start.elapsed();
 
-        if elapsed > time_limit.mul_f32(0.6) && depth > 1 {
-            break;
+        if depth > 1 {
+            if let Some(t) = my_time {
+                if t < 20_000 {
+                    if elapsed > time_limit.mul_f32(0.4) { break; }
+                } else {
+                    if elapsed > time_limit.mul_f32(0.7) { break; }
+                }
+            }
         }
 
-        if let Some(new_mv) = choose_move(depth, board) {
+        if let Some(new_mv) = choose_move(depth, board, best_mv) {
             best_mv = Some(new_mv);
 
             // Debugging

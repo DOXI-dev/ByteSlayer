@@ -20,7 +20,7 @@ fn get_piece_value(piece: Piece) -> i32 {
 }
 
 // Move sorting for the negamax function
-fn sort_moves(board: &Board, movegen: MoveGen) -> Vec<ChessMove> {
+fn sort_moves(board: &Board, movegen: MoveGen, best_move: Option<ChessMove>) -> Vec<ChessMove> {
     let mut moves: Vec<ChessMove> = movegen.collect();
     let mut targets = *board.color_combined(!board.side_to_move());
 
@@ -33,6 +33,10 @@ fn sort_moves(board: &Board, movegen: MoveGen) -> Vec<ChessMove> {
         let destination = m.get_dest();
         let source = m.get_source();
         let dest_mask = BitBoard::from_square(destination);
+
+        if Some(*m) == best_move{
+            score += 100000
+        }
 
         if (targets & dest_mask).popcnt() > 0 {
             if let Some(capturing_piece) = board.piece_on(source) {
@@ -64,7 +68,7 @@ fn quiescence(board: &Board, mut alpha: i32, beta: i32) -> i32 {
     let mut movegen = MoveGen::new_legal(board);
     movegen.set_iterator_mask(*board.color_combined(!board.side_to_move()));
 
-    let sorted_moves = sort_moves(board, movegen);
+    let sorted_moves = sort_moves(board, movegen, None);
 
     for m in sorted_moves {
         let new_board = board.make_move_new(m);
@@ -84,7 +88,7 @@ fn quiescence(board: &Board, mut alpha: i32, beta: i32) -> i32 {
 const INFINITY: i32 = 2_000_000;
 
 // Negamax and alpha-beta pruning function
-fn negamax(board: &Board, depth: i32, mut alpha: i32, beta: i32) -> i32 {
+fn negamax(board: &Board, depth: i32, mut alpha: i32, beta: i32, best_move: Option<ChessMove>) -> i32 {
     match board.status() {
         BoardStatus::Checkmate => return -20000 + depth,
         BoardStatus::Stalemate => return 0,
@@ -96,14 +100,14 @@ fn negamax(board: &Board, depth: i32, mut alpha: i32, beta: i32) -> i32 {
     }
 
     let movegen = MoveGen::new_legal(board);
-    let new_movegen = sort_moves(board, movegen);
+    let new_movegen = sort_moves(board, movegen, best_move);
 
     let mut value: i32 = -INFINITY;
 
     for m in new_movegen {
         let new_board = board.make_move_new(m);
 
-        let score = -negamax(&new_board, depth - 1, -beta, -alpha);
+        let score = -negamax(&new_board, depth - 1, -beta, -alpha, None);
 
         value = value.max(score);
         alpha = alpha.max(value);
@@ -116,18 +120,18 @@ fn negamax(board: &Board, depth: i32, mut alpha: i32, beta: i32) -> i32 {
 }
 
 // Function to choose a move
-pub fn choose_move(depth: i32, board: &Board) -> Option<ChessMove> {
+pub fn choose_move(depth: i32, board: &Board, previous_best_move: Option<ChessMove>) -> Option<ChessMove> {
     let mut best_move: Option<ChessMove> = None;
     let mut alpha = -INFINITY;
     let beta = INFINITY;
 
     let movegen = MoveGen::new_legal(board);
-    let new_movegen = sort_moves(board, movegen);
+    let new_movegen = sort_moves(board, movegen, previous_best_move);
 
     for m in new_movegen {
         let new_board = board.make_move_new(m);
 
-        let value = -negamax(&new_board, depth - 1, -beta, -alpha);
+        let value = -negamax(&new_board, depth - 1, -beta, -alpha, None);
 
         if value > alpha {
             alpha = value;
