@@ -6,11 +6,11 @@ License : GPLv3
 */
 
 // ----- FILES ----
-mod uci;
-mod evaluation;
 mod engine;
+mod evaluation;
 mod pst;
-
+mod transposition;
+mod uci;
 
 // ----- MAIN -----
 fn main() {

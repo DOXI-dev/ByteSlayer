@@ -4,6 +4,7 @@ This is the chess engine that will select the best move to play.
 
 // ----- LIBRARIES -----
 use crate::evaluation;
+use crate::transposition::{HashFlag, TranspositionTable};
 use chess::{BitBoard, Board, BoardStatus, ChessMove, MoveGen, Piece};
 
 // ----- MODEL -----
@@ -34,7 +35,7 @@ fn sort_moves(board: &Board, movegen: MoveGen, best_move: Option<ChessMove>) -> 
         let source = m.get_source();
         let dest_mask = BitBoard::from_square(destination);
 
-        if Some(*m) == best_move{
+        if Some(*m) == best_move {
             score += 100000
         }
 
@@ -88,11 +89,38 @@ fn quiescence(board: &Board, mut alpha: i32, beta: i32) -> i32 {
 const INFINITY: i32 = 2_000_000;
 
 // Negamax and alpha-beta pruning function
-fn negamax(board: &Board, depth: i32, mut alpha: i32, beta: i32, best_move: Option<ChessMove>) -> i32 {
+fn negamax(
+    board: &Board,
+    depth: i32,
+    mut alpha: i32,
+    beta: i32,
+    tt: &mut TranspositionTable,
+) -> i32 {
+    let alpha_orig = alpha;
+    let mut best_move_found: Option<ChessMove> = None;
+
     match board.status() {
         BoardStatus::Checkmate => return -20000 + depth,
         BoardStatus::Stalemate => return 0,
         BoardStatus::Ongoing => {}
+    }
+
+    let key = board.get_hash();
+
+    let mut tt_best_move = None;
+
+    if let Some(entry) = tt.lookup(key) {
+        tt_best_move = entry.best_move;
+
+        if entry.depth >= depth as u8 {
+            if entry.flag == HashFlag::Exact
+                || entry.flag == HashFlag::LowerBound && entry.score >= beta
+                || entry.flag == HashFlag::UpperBound && entry.score <= alpha
+            {
+                return entry.score;
+            }
+            tt_best_move = entry.best_move;
+        }
     }
 
     if depth == 0 {
@@ -100,27 +128,47 @@ fn negamax(board: &Board, depth: i32, mut alpha: i32, beta: i32, best_move: Opti
     }
 
     let movegen = MoveGen::new_legal(board);
-    let new_movegen = sort_moves(board, movegen, best_move);
+    let new_movegen = sort_moves(board, movegen, tt_best_move);
 
     let mut value: i32 = -INFINITY;
 
     for m in new_movegen {
         let new_board = board.make_move_new(m);
 
-        let score = -negamax(&new_board, depth - 1, -beta, -alpha, None);
+        let score = -negamax(&new_board, depth - 1, -beta, -alpha, tt);
 
-        value = value.max(score);
+        if score > value {
+            value = score;
+            best_move_found = Some(m);
+        }
+
         alpha = alpha.max(value);
 
         if alpha >= beta {
             break;
         }
     }
+
+    let flag = if value <= alpha_orig {
+        HashFlag::UpperBound
+    } else if value >= beta {
+        HashFlag::LowerBound
+    } else {
+        HashFlag::Exact
+    };
+
+    tt.store(key, depth as u8, value, flag, best_move_found);
+
     value
 }
 
 // Function to choose a move
-pub fn choose_move(depth: i32, board: &Board, previous_best_move: Option<ChessMove>) -> Option<ChessMove> {
+pub fn choose_move(
+    depth: i32,
+    board: &Board,
+    previous_best_move: Option<ChessMove>,
+    tt: &mut TranspositionTable,
+) -> Option<ChessMove> {
     let mut best_move: Option<ChessMove> = None;
     let mut alpha = -INFINITY;
     let beta = INFINITY;
@@ -131,7 +179,7 @@ pub fn choose_move(depth: i32, board: &Board, previous_best_move: Option<ChessMo
     for m in new_movegen {
         let new_board = board.make_move_new(m);
 
-        let value = -negamax(&new_board, depth - 1, -beta, -alpha, None);
+        let value = -negamax(&new_board, depth - 1, -beta, -alpha, tt);
 
         if value > alpha {
             alpha = value;

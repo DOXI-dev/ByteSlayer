@@ -4,6 +4,7 @@ This is the file for the UCI communication protocol.
 
 // ----- LIBRARIES -----
 use crate::engine::choose_move;
+use crate::transposition::TranspositionTable;
 use chess::{Board, ChessMove};
 use std::io::{self, BufRead};
 use std::str::FromStr;
@@ -38,7 +39,7 @@ fn handle_position(board: &mut Board, command: Vec<&str>) {
 }
 
 // go function for "go wtime <x> btime <x>" command
-fn go(board: &mut Board, command: Vec<&str>) {
+fn go(board: &mut Board, command: Vec<&str>, tt: &mut TranspositionTable) {
     let mut wtime = None;
     let mut btime = None;
 
@@ -76,6 +77,12 @@ fn go(board: &mut Board, command: Vec<&str>) {
 
     let time_limit = Duration::from_millis(time_limit_ms as u64);
 
+    // Debugging
+    println!(
+        "time received: {:?} ms | time limit calculated: {} ms",
+        my_time, time_limit_ms
+    );
+
     let start = Instant::now();
 
     let mut best_mv = None;
@@ -86,15 +93,27 @@ fn go(board: &mut Board, command: Vec<&str>) {
         if depth > 1 {
             if let Some(t) = my_time {
                 if t < 20_000 {
-                    if elapsed > time_limit.mul_f32(0.4) { break; }
+                    if elapsed > time_limit.mul_f32(0.4) {
+                        break;
+                    }
                 } else {
-                    if elapsed > time_limit.mul_f32(0.7) { break; }
+                    if elapsed > time_limit.mul_f32(0.7) {
+                        break;
+                    }
                 }
             }
         }
 
-        if let Some(new_mv) = choose_move(depth, board, best_mv) {
+        if let Some(new_mv) = choose_move(depth, board, best_mv, tt) {
             best_mv = Some(new_mv);
+
+            // Debugging
+            println!(
+                "info depth {} time {} pv {}",
+                depth,
+                elapsed.as_millis(),
+                new_mv
+            );
         }
 
         if start.elapsed() >= time_limit {
@@ -117,6 +136,8 @@ pub fn uci() {
     let stdin = io::stdin();
     let mut board = Board::default();
 
+    let mut tt = TranspositionTable::new(1 << 20);
+
     for line in stdin.lock().lines() {
         let raw_line = line.unwrap();
 
@@ -135,7 +156,7 @@ pub fn uci() {
                 handle_position(&mut board, commands);
             }
             Some(&"go") => {
-                go(&mut board, commands);
+                go(&mut board, commands, &mut tt);
             }
             Some(&"quit") => break,
             _ => {}
