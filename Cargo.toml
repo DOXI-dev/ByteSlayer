@@ -1,8 +1,6 @@
-[package]
-name = "genetic_offline"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-byteslayer_core = { path = "../../byteslayer_core" }
-chess = "3.2.0"
+[workspace]
+members = [
+    "byteslayer_core",
+    "experiments/genetic_offline",
+]
+resolver = "2"
